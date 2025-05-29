@@ -15,6 +15,14 @@ type BoardResponse = {
   }[];
 };
 
+function mapBoardToApi(board: Board): Partial<BoardResponse> {
+  return {
+    ...board,
+    columns: Object.values(board.columns),
+    cards: Object.values(board.cards),
+  }
+}
+
 function mapBoardFromApi(board: BoardResponse): Board {
   return {
     ...board,
@@ -37,5 +45,31 @@ export const trellitoApi = createApi({
       transformResponse: (response: { board: BoardResponse }): Board =>
         mapBoardFromApi(response.board),
     }),
+    addBoard: builder.mutation<Board, Partial<Board>>({
+      query: (newBoard) => ({
+        url: "/boards",
+        method: "POST",
+        body: mapBoardToApi(newBoard as Board),
+      }),
+      transformResponse: (response: { board: BoardResponse }): Board => {
+        return mapBoardFromApi(response.board);
+      }
+    }),
+    deleteBoard: builder.mutation<void, string>({
+      query: (id) => ({
+        url: `/boards/${id}`,
+        method: 'DELETE',
+      })
+    }),
+    updateBoard: builder.mutation<Board, Partial<Board> & { id: string }>({
+      query: (updateBoard) => ({
+        url: `/boards/${updateBoard.id}`,
+        method: 'PUT',
+        body: updateBoard,
+      }),
+      transformResponse: (response: { board: BoardResponse }): Board => {
+        return mapBoardFromApi(response.board);
+      }
+    })
   }),
 });
