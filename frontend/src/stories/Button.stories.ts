@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+
 import { fn } from 'storybook/test';
 
 import { Button } from './Button';
@@ -50,11 +51,4 @@ export const Small: Story = {
     size: 'small',
     label: 'Button',
   },
-};
-
-export const Est: Story = {
-  args: {
-    primary: false,
-    label: "Button"
-  }
 };
