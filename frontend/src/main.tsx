@@ -4,7 +4,7 @@ import "./index.css";
 import App from "./App.tsx";
 import { Provider as ReduxProvider } from "react-redux";
 import { store } from "./store";
-import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeProvider } from "@/providers/theme-provider.tsx";
 
 if (import.meta.env.DEV && import.meta.env.VITE_USE_MSW === "true") {
   console.log("Running in dev:mock mode");
