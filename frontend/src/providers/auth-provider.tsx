@@ -9,7 +9,7 @@ import React, {
 const AUTH_API_URL =
   import.meta.env.VITE_AUTH_API_URL || "http://localhost:3000/api/auth";
 
-type User = {
+export type User = {
   id: string;
   avatar?: string;
   email?: string;
