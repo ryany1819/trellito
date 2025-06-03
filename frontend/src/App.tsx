@@ -3,6 +3,7 @@ import LoginPage from "./pages/LoginPage";
 import Dashboard from "./pages/Dashboard";
 import BoardPage from "./pages/BoardPage";
 import Layout from "./components/Layout";
+import ProtectedRoute from "./ProtectedRoute";
 
 function App() {
   return (
@@ -10,8 +11,11 @@ function App() {
       <Layout>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/board/:boardId" element={<BoardPage />} />"
+          <Route element={<ProtectedRoute />}>
+            {/* Protected routes that require authentication */}
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/board/:boardId" element={<BoardPage />} />
+          </Route>
         </Routes>
       </Layout>
     </Router>
