@@ -1,6 +1,8 @@
-export default function UserAvatar({isLoggedIn = false, user = null, navLogin}: {
+import type { User } from "@/models/user";
+
+export default function UserAvatar({isLoggedIn = false, user, navLogin}: {
   isLoggedIn?: boolean;
-  user?: { name: string } | null;
+  user?: User;
   navLogin?: () => void;
 }) {
   // Replace with your actual login/avatar logic

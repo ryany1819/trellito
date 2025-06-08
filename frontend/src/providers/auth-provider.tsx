@@ -6,14 +6,7 @@ import React, {
   useState,
 } from "react";
 import { AUTH_API_URL } from "@/config";
-
-export type User = {
-  id: string;
-  avatar?: string;
-  email?: string;
-  name?: string;
-  roles?: string[];
-};
+import type { User } from "@/models/user";
 
 type AuthContextState = {
   isLoggedIn: boolean;
@@ -41,6 +34,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   // refresh token logic on mount
   useEffect(() => {
     const tryRefresh = async () => {
+      console.log("Attempting to refresh access token...");
       setLoading(true);
       setError(undefined);
       try {
