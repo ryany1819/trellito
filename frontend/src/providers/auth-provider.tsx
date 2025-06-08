@@ -5,9 +5,7 @@ import React, {
   useEffect,
   useState,
 } from "react";
-
-const AUTH_API_URL =
-  import.meta.env.VITE_AUTH_API_URL || "http://localhost:3000/api/auth";
+import { AUTH_API_URL } from "@/config";
 
 export type User = {
   id: string;
