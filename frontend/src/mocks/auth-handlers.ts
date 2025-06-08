@@ -50,7 +50,17 @@ export const authHandlers = [
     const newAccessToken = jwt.sign({ sub: decoded.sub }, JWT_SECRET, {
       expiresIn: "15m",
     });
-    return HttpResponse.json({ accessToken: newAccessToken });
+    const refreshToken = jwt.sign({ sub: decoded.sub }, JWT_SECRET, {
+      expiresIn: "7d",
+    });
+    return HttpResponse.json(
+      { accessToken: newAccessToken },
+      {
+        headers: {
+          "Set-Cookie": `refreshToken=${refreshToken}; Path=/; Max-Age=604800; SameSite=Lax`,
+        },
+      }
+    );
   }),
   http.post(`${AUTH_API_URL}/signup`, async ({ request }) => {
     const { email, password } = (await request.json()) as {
@@ -76,7 +86,17 @@ export const authHandlers = [
     const accessToken = jwt.sign({ sub: newAccount.id }, JWT_SECRET, {
       expiresIn: "15m",
     });
-    return HttpResponse.json({ accessToken });
+    const refreshToken = jwt.sign({ sub: newAccount.id }, JWT_SECRET, {
+      expiresIn: "7d",
+    });
+    return HttpResponse.json(
+      { accessToken },
+      {
+        headers: {
+          "Set-Cookie": `refreshToken=${refreshToken}; Path=/; Max-Age=604800; SameSite=Lax`,
+        },
+      }
+    );
   }),
   http.post(`${AUTH_API_URL}/login`, async ({ request }) => {
     const { email, password } = (await request.json()) as {
@@ -88,7 +108,17 @@ export const authHandlers = [
       const accessToken = jwt.sign({ sub: acc.id }, JWT_SECRET, {
         expiresIn: "15m",
       });
-      return HttpResponse.json({ accessToken });
+      const refreshToken = jwt.sign({ sub: acc.id }, JWT_SECRET, {
+        expiresIn: "7d",
+      });
+      return HttpResponse.json(
+        { accessToken },
+        {
+          headers: {
+            "Set-Cookie": `refreshToken=${refreshToken}; Path=/; Max-Age=604800; SameSite=Lax`,
+          },
+        }
+      );
     }
     return HttpResponse.json(
       { error: "Invalid email or password" },
@@ -96,6 +126,13 @@ export const authHandlers = [
     );
   }),
   http.post(`${AUTH_API_URL}/logout`, async () => {
-    return HttpResponse.json({ success: true }, { status: 200 });
+    return HttpResponse.json(
+      { success: true },
+      {
+        headers: {
+          "Set-Cookie": "refreshToken=; HttpOnly; Path=/; Max-Age=0",
+        },
+      }
+    );
   }),
 ];
