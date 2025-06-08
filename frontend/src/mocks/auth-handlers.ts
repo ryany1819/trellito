@@ -1,9 +1,7 @@
 import { http, HttpResponse } from "msw";
 import { AUTH_API_URL } from "@/config";
 import type { AccountDto } from "@/dto/account";
-import jwt from "jsonwebtoken";
-
-const JWT_SECRET = "mock_secret";
+import { mockSign, mockDecode } from './mock-jwt';
 
 const mockAccounts: AccountDto[] = [
   {
@@ -34,12 +32,14 @@ const mockAccounts: AccountDto[] = [
 
 export const authHandlers = [
   http.post(`${AUTH_API_URL}/refresh`, async ({ cookies }) => {
+    console.log("Handling POST /refresh request in mock handler");
     const accessToken = cookies.accessToken;
     if (!accessToken) {
       return HttpResponse.json({ error: "No access token" }, { status: 401 });
     }
+    console.log("Refreshing access token with mock handler");
     // Decode/validate access token (for mock, just check existence)
-    const decoded = jwt.decode(accessToken) as { sub?: string };
+    const decoded = mockDecode(accessToken) as { sub?: string };
     if (!decoded?.sub) {
       return HttpResponse.json(
         { error: "Invalid refresh token" },
@@ -47,12 +47,8 @@ export const authHandlers = [
       );
     }
     // Issue new access token
-    const newAccessToken = jwt.sign({ sub: decoded.sub }, JWT_SECRET, {
-      expiresIn: "15m",
-    });
-    const refreshToken = jwt.sign({ sub: decoded.sub }, JWT_SECRET, {
-      expiresIn: "7d",
-    });
+    const newAccessToken = mockSign({ sub: decoded.sub });
+    const refreshToken = mockSign({ sub: decoded.sub });
     return HttpResponse.json(
       { accessToken: newAccessToken },
       {
@@ -83,12 +79,8 @@ export const authHandlers = [
       createdAt: new Date(),
     };
     mockAccounts.push(newAccount);
-    const accessToken = jwt.sign({ sub: newAccount.id }, JWT_SECRET, {
-      expiresIn: "15m",
-    });
-    const refreshToken = jwt.sign({ sub: newAccount.id }, JWT_SECRET, {
-      expiresIn: "7d",
-    });
+    const accessToken = mockSign({ sub: newAccount.id });
+    const refreshToken = mockSign({ sub: newAccount.id });
     return HttpResponse.json(
       { accessToken },
       {
@@ -105,12 +97,8 @@ export const authHandlers = [
     };
     const acc = mockAccounts.find((acc) => acc.email === email);
     if (acc && acc.password === password) {
-      const accessToken = jwt.sign({ sub: acc.id }, JWT_SECRET, {
-        expiresIn: "15m",
-      });
-      const refreshToken = jwt.sign({ sub: acc.id }, JWT_SECRET, {
-        expiresIn: "7d",
-      });
+      const accessToken = mockSign({ sub: acc.id });
+      const refreshToken = mockSign({ sub: acc.id });
       return HttpResponse.json(
         { accessToken },
         {
