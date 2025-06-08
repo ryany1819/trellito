@@ -1,4 +1,6 @@
-export type UserProfileDto = {
+import type { UserDto } from './user';
+
+export type UserProfileDto = UserDto & {
   id: string;
   userId: string;
   bio?: string;
