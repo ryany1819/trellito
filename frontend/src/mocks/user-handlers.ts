@@ -6,21 +6,21 @@ import { mockDecode } from "./mock-jwt";
 const mockUsers: UserDto[] = [
   {
     id: "1",
-    accountId: "acc1",
+    accountId: "user-1",
     displayName: "John Doe",
     avatarUrl: "https://example.com/avatar1.png",
     createdAt: new Date("2023-01-01T00:00:00Z"),
   },
   {
     id: "2",
-    accountId: "acc2",
+    accountId: "user-2",
     displayName: "Jane Smith",
     avatarUrl: "https://example.com/avatar2.png",
     createdAt: new Date("2023-02-01T00:00:00Z"),
   },
   {
     id: "3",
-    accountId: "acc3",
+    accountId: "user-3",
     displayName: "Alice Johnson",
     avatarUrl: "https://example.com/avatar3.png",
     createdAt: new Date("2023-03-01T00:00:00Z"),
