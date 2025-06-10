@@ -18,7 +18,7 @@ const mockUsers: UserDto[] = [
     accountId: "user-2",
     email: "admin@example.com",
     displayName: "Jane Smith",
-    avatarUrl: "https://example.com/avatar2.png",
+    avatarUrl: "https://i.pravatar.cc/300?img=2",
     createdAt: new Date("2023-02-01T00:00:00Z"),
   },
   {
