@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from "@/providers/auth-provider";
 import { Button } from "@/components/ui/button";
@@ -16,10 +16,11 @@ function LoginPage() {
   const returnUrl = params.get('returnUrl') || '/';
 
 	// TODO: Redirect if already logged in
-	if (isLoggedIn) {
-    navigate(returnUrl);
-    return null;
-	}
+  useEffect(() => {
+    if (isLoggedIn) {
+      navigate(returnUrl);
+    }
+  }, [isLoggedIn]);
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
