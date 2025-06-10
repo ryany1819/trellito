@@ -3,7 +3,7 @@ import { AUTH_API_URL } from "@/config";
 import type { AccountDto } from "@/dto/account";
 import { mockSign, mockDecode } from './mock-jwt';
 
-const mockAccounts: AccountDto[] = [
+export const mockAccounts: AccountDto[] = [
   {
     id: "user-1",
     email: "test@example.com",
@@ -33,13 +33,13 @@ const mockAccounts: AccountDto[] = [
 export const authHandlers = [
   http.post(`${AUTH_API_URL}/refresh`, async ({ cookies }) => {
     console.log("Handling POST /refresh request in mock handler");
-    const accessToken = cookies.accessToken;
-    if (!accessToken) {
-      return HttpResponse.json({ error: "No access token" }, { status: 401 });
+    const refreshToken = cookies.refreshToken;
+    if (!refreshToken) {
+      return HttpResponse.json({ error: "No refresh token" }, { status: 401 });
     }
     console.log("Refreshing access token with mock handler");
     // Decode/validate access token (for mock, just check existence)
-    const decoded = mockDecode(accessToken) as { sub?: string };
+    const decoded = mockDecode(refreshToken) as { sub?: string };
     if (!decoded?.sub) {
       return HttpResponse.json(
         { error: "Invalid refresh token" },
@@ -48,12 +48,12 @@ export const authHandlers = [
     }
     // Issue new access token
     const newAccessToken = mockSign({ sub: decoded.sub });
-    const refreshToken = mockSign({ sub: decoded.sub });
+    const newRefreshToken = mockSign({ sub: decoded.sub });
     return HttpResponse.json(
       { accessToken: newAccessToken },
       {
         headers: {
-          "Set-Cookie": `refreshToken=${refreshToken}; Path=/; Max-Age=604800; SameSite=Lax`,
+          "Set-Cookie": `refreshToken=${newRefreshToken}; Path=/; Max-Age=604800; SameSite=Lax`,
         },
       }
     );

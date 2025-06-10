@@ -2,11 +2,13 @@ import { http, HttpResponse } from "msw";
 import { BACKEND_URL } from "@/config";
 import type { UserDto } from "@/dto/user";
 import { mockDecode } from "./mock-jwt";
+import { mockAccounts } from "./auth-handlers";
 
 const mockUsers: UserDto[] = [
   {
     id: "1",
     accountId: "user-1",
+    email: "test@example.com",
     displayName: "John Doe",
     avatarUrl: "https://example.com/avatar1.png",
     createdAt: new Date("2023-01-01T00:00:00Z"),
@@ -14,6 +16,7 @@ const mockUsers: UserDto[] = [
   {
     id: "2",
     accountId: "user-2",
+    email: "admin@example.com",
     displayName: "Jane Smith",
     avatarUrl: "https://example.com/avatar2.png",
     createdAt: new Date("2023-02-01T00:00:00Z"),
@@ -21,6 +24,7 @@ const mockUsers: UserDto[] = [
   {
     id: "3",
     accountId: "user-3",
+    email: "guest@example.com",
     displayName: "Alice Johnson",
     avatarUrl: "https://example.com/avatar3.png",
     createdAt: new Date("2023-03-01T00:00:00Z"),
@@ -45,11 +49,23 @@ export const userHandlers = [
       if (!decoded?.sub) {
         return HttpResponse.json({ error: "Invalid token" }, { status: 401 });
       }
+      const account = mockAccounts.find((a) => a.id === decoded.sub);
+      if (!account) {
+        return HttpResponse.json({ error: "Account not found" }, { status: 404 });
+      }
       const user = mockUsers.find((u) => u.accountId === decoded.sub);
       if (!user) {
         return HttpResponse.json({ error: "User not found" }, { status: 404 });
       }
-      return HttpResponse.json(user);
+      const userDto: UserDto = {
+        id: user.id,
+        accountId: user.accountId,
+        email: account.email,
+        displayName: user.displayName,
+        avatarUrl: user.avatarUrl,
+        createdAt: user.createdAt,
+      };
+      return HttpResponse.json(userDto);
     } catch (error) {
       return HttpResponse.json({ error: "Invalid token" }, { status: 401 });
     }

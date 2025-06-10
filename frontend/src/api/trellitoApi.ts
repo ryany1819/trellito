@@ -23,7 +23,16 @@ function mapBoardFromApi(board: BoardDto): Board {
 
 export const trellitoApi = createApi({
   reducerPath: "trellitoApi",
-  baseQuery: fetchBaseQuery({ baseUrl }),
+  baseQuery: fetchBaseQuery({ 
+    baseUrl,
+    prepareHeaders: (headers, { getState }) => {
+      const accessToken = (getState() as any).auth.accessToken;
+      if (accessToken) {
+        headers.set('Authorization', `Bearer ${accessToken}`);
+      }
+      return headers;
+    },
+  }),
   endpoints: (builder) => ({
     getBoards: builder.query<Board[], void>({
       query: () => "/boards",

@@ -5,13 +5,17 @@ import React, {
   useEffect,
   useState,
 } from "react";
-import { AUTH_API_URL } from "@/config";
+import { useSelector, useDispatch } from "react-redux";
+import { AUTH_API_URL, BACKEND_URL } from "@/config";
 import type { User } from "@/models/user";
+import { setAccessToken } from "@/slices/authSlice";
+import type { RootState } from "@/store";
+import type { UserDto } from "@/dto/user";
 
 type AuthContextState = {
   isLoggedIn: boolean;
   user?: User;
-  accessToken?: string;
+  accessToken: string | null;
   loading: boolean;
   error?: string;
   login?: (email: string, password: string) => Promise<void>;
@@ -26,8 +30,9 @@ type AuthProviderProps = {
 };
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
+  const accessToken = useSelector((state: RootState) => state.auth.accessToken);
+  const dispatch = useDispatch();
   const [user, setUser] = useState<User | undefined>();
-  const [accessToken, setAccessToken] = useState<string>();
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | undefined>();
 
@@ -46,12 +51,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         });
         if (res.ok) {
           const data = await res.json();
-          setAccessToken(data.accessToken);
+          dispatch(setAccessToken(data.accessToken));
         } else {
-          setAccessToken(undefined);
+          dispatch(setAccessToken(null));
         }
       } catch (err) {
-        setAccessToken(undefined);
+        dispatch(setAccessToken(null));
         console.error("Error refreshing token:", err);
         setError(err instanceof Error ? err.message : "Unknown error");
       } finally {
@@ -69,7 +74,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const fetchUser = async () => {
       try {
         // returns user data based on access token
-        const res = await fetch(`${AUTH_API_URL}/me`, {
+        const res = await fetch(`${BACKEND_URL}/me`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -80,7 +85,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           setUser(undefined);
           return;
         }
-        const user: User = await res.json();
+        const userDto: UserDto = await res.json();
+        const user: User = {
+          id: userDto.id,
+          email: userDto.email,
+          name: userDto.displayName,
+          avatar: userDto.avatarUrl,
+        }
+        console.log("Fetched user data:", user);
         setUser(user);
       } catch (err) {
         setUser(undefined);
@@ -103,14 +115,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         body: JSON.stringify({ email, password }),
       });
       if (!res.ok) {
-        const error = await res.text();
-        throw new Error(error || "Login failed");
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Login failed");
       }
       const data = await res.json();
-      setAccessToken(data.accessToken);
+      dispatch(setAccessToken(data.accessToken));
     } catch (err) {
+      console.log("hello: ", err);
       setError(err instanceof Error ? err.message : "Unknown error");
-      setAccessToken(undefined);
+      dispatch(setAccessToken(null));
     } finally {
       setLoading(false);
     }
@@ -125,16 +138,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         credentials: "include",
         headers: {
           "Content-Type": "application/json",
-          Authentication: `Bearer ${accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       });
       if (!res.ok) {
-        const error = await res.text();
-        throw new Error(error || "Logout failed");
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Logout failed");
       }
-      setAccessToken(undefined);
+      dispatch(setAccessToken(null));
     } catch (err) {
-      setAccessToken(undefined);
+      dispatch(setAccessToken(null));
       setError(err instanceof Error ? err.message : "Unknown error");
       // No setUser here
     } finally {
@@ -155,13 +168,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         body: JSON.stringify({ email, password }),
       });
       if (!res.ok) {
-        const error = await res.text();
-        throw new Error(error || "Registration failed");
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Registration failed");
       }
       const data = await res.json();
       setAccessToken(data.accessToken);
     } catch (err) {
-      setAccessToken(undefined);
+      dispatch(setAccessToken(null));
       setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
       setLoading(false);
@@ -179,13 +192,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           headers: { "Content-Type": "application/json" },
         });
         if (!res.ok) {
-          const error = await res.text();
-          throw new Error(error || "Refresh token failed");
+          const errorData = await res.json();
+          throw new Error(errorData.error || "Refresh token failed");
         }
         const data = await res.json();
-        setAccessToken(data.accessToken);
+        dispatch(setAccessToken(data.accessToken));
       } catch (err) {
-        setAccessToken(undefined);
+        dispatch(setAccessToken(null));
         setError(err instanceof Error ? err.message : "Unknown error");
       } finally {
         setLoading(false);
