@@ -46,16 +46,13 @@ export const authHandlers = [
         { status: 401 }
       );
     }
-    // Issue new access token
-    const newAccessToken = mockSign({ sub: decoded.sub });
-    const newRefreshToken = mockSign({ sub: decoded.sub });
+    // Issue new access token, keep same refresh token
+    const newAccessToken = mockSign({ 
+      sub: decoded.sub,
+      exp: Math.floor(Date.now() / 1000) + 15 * 60,
+    });
     return HttpResponse.json(
       { accessToken: newAccessToken },
-      {
-        headers: {
-          "Set-Cookie": `refreshToken=${newRefreshToken}; Path=/; Max-Age=604800; SameSite=Lax`,
-        },
-      }
     );
   }),
   http.post(`${AUTH_API_URL}/signup`, async ({ request }) => {
@@ -79,7 +76,7 @@ export const authHandlers = [
       createdAt: new Date(),
     };
     mockAccounts.push(newAccount);
-    const accessToken = mockSign({ sub: newAccount.id });
+    const accessToken = mockSign({ sub: newAccount.id, exp: Math.floor(Date.now() / 1000) + 15 * 60 });
     const refreshToken = mockSign({ sub: newAccount.id });
     return HttpResponse.json(
       { accessToken },
@@ -97,7 +94,7 @@ export const authHandlers = [
     };
     const acc = mockAccounts.find((acc) => acc.email === email);
     if (acc && acc.password === password) {
-      const accessToken = mockSign({ sub: acc.id });
+      const accessToken = mockSign({ sub: acc.id, exp: Math.floor(Date.now() / 1000) + 15 * 60 });
       const refreshToken = mockSign({ sub: acc.id });
       return HttpResponse.json(
         { accessToken },
