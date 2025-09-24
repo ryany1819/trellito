@@ -4,7 +4,7 @@ import type { UserDto } from "@/dto/user";
 import { mockDecode } from "./mock-jwt";
 import { mockAccounts } from "./auth-handlers";
 
-const mockUsers: UserDto[] = [
+export const mockUsers: UserDto[] = [
   {
     id: "1",
     accountId: "user-1",

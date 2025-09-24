@@ -1,11 +1,12 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import type { RootState } from "@/store"; // Adjust the import path to where your RootState is defined
 import type { Board } from "@/models/board";
 import { BACKEND_URL as baseUrl } from "@/config";
 import type { BoardDto } from "@/dto/board";
 
 console.log("Using base URL:", baseUrl);
 
-function mapBoardToApi(board: Board): Partial<BoardDto> {
+function mapBoardToDto(board: Board): Partial<BoardDto> {
   return {
     ...board,
     columns: Object.values(board.columns),
@@ -13,11 +14,11 @@ function mapBoardToApi(board: Board): Partial<BoardDto> {
   };
 }
 
-function mapBoardFromApi(board: BoardDto): Board {
+function mapBoardFromDto(dto: BoardDto): Board {
   return {
-    ...board,
-    columns: Object.fromEntries(board.columns.map((col) => [col.id, col])),
-    cards: Object.fromEntries(board.cards.map((card) => [card.id, card])),
+    ...dto,
+    columns: Object.fromEntries(dto.columns.map((col) => [col.id, col])),
+    cards: Object.fromEntries(dto.cards.map((card) => [card.id, card])),
   };
 }
 
@@ -26,7 +27,7 @@ export const trellitoApi = createApi({
   baseQuery: fetchBaseQuery({ 
     baseUrl,
     prepareHeaders: (headers, { getState }) => {
-      const accessToken = (getState() as any).auth.accessToken;
+      const accessToken = (getState() as RootState).auth.accessToken;
       if (accessToken) {
         headers.set('Authorization', `Bearer ${accessToken}`);
       }
@@ -37,21 +38,21 @@ export const trellitoApi = createApi({
     getBoards: builder.query<Board[], void>({
       query: () => "/boards",
       transformResponse: (response: { boards: BoardDto[] }): Board[] =>
-        response.boards?.map(mapBoardFromApi),
+        response.boards?.map(mapBoardFromDto),
     }),
     getBoardById: builder.query<Board, string>({
       query: (id) => "/boards/" + id,
       transformResponse: (response: { board: BoardDto }): Board =>
-        mapBoardFromApi(response.board),
+        mapBoardFromDto(response.board),
     }),
     addBoard: builder.mutation<Board, Partial<Board>>({
       query: (newBoard) => ({
         url: "/boards",
         method: "POST",
-        body: mapBoardToApi(newBoard as Board),
+        body: mapBoardToDto(newBoard as Board),
       }),
       transformResponse: (response: { board: BoardDto }): Board => {
-        return mapBoardFromApi(response.board);
+        return mapBoardFromDto(response.board);
       },
     }),
     deleteBoard: builder.mutation<void, string>({
@@ -67,7 +68,7 @@ export const trellitoApi = createApi({
         body: updateBoard,
       }),
       transformResponse: (response: { board: BoardDto }): Board => {
-        return mapBoardFromApi(response.board);
+        return mapBoardFromDto(response.board);
       },
     }),
   }),
