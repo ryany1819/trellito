@@ -3,6 +3,8 @@ import type { RootState } from "@/store"; // Adjust the import path to where you
 import type { Board } from "@/models/board";
 import { BACKEND_URL as baseUrl } from "@/config";
 import type { BoardDto } from "@/dto/board";
+import type { UserDto } from "@/dto/user";
+import type { User } from "@/models/user";
 
 console.log("Using base URL:", baseUrl);
 
@@ -17,8 +19,16 @@ function mapBoardToDto(board: Board): Partial<BoardDto> {
 function mapBoardFromDto(dto: BoardDto): Board {
   return {
     ...dto,
+    owner: { id: dto.ownerId } as User,
+    members: (dto.memberIds || []).map((id) => ({id} as User)),
     columns: Object.fromEntries(dto.columns.map((col) => [col.id, col])),
     cards: Object.fromEntries(dto.cards.map((card) => [card.id, card])),
+  };
+}
+
+function mapUserFromDto(dto: UserDto): User {
+  return {
+    ...dto,
   };
 }
 
@@ -71,5 +81,20 @@ export const trellitoApi = createApi({
         return mapBoardFromDto(response.board);
       },
     }),
+    getMe: builder.query<User, void>({
+      query: () => ({
+        url: "/me",
+        method: "GET",
+      }),
+      transformResponse: (response: {user: UserDto}): User => (mapUserFromDto(response.user)),
+    }),
+    getUserById: builder.query<User, string>({
+      query: (id) => ({
+        url: `/users/${id}`,
+        method: "GET",
+      }),
+      transformResponse: (response: {user: UserDto}): User => (mapUserFromDto(response.user)),
+    }),
   }),
 });
+

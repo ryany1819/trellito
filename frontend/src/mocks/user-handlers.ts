@@ -65,7 +65,7 @@ export const userHandlers = [
         avatarUrl: user.avatarUrl,
         createdAt: user.createdAt,
       };
-      return HttpResponse.json(userDto);
+      return HttpResponse.json({ user: userDto });
     } catch (error) {
       return HttpResponse.json({ error: "Invalid token" }, { status: 401 });
     }
