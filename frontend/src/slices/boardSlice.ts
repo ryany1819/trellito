@@ -4,10 +4,12 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 
 type BoardState = {
     selectedBoardId: string | null;
+    selectedCardId: string | null;
 };
 
 const initialState: BoardState = {
     selectedBoardId: null,
+    selectedCardId: null,
 };
 
 const boardSlice = createSlice({
@@ -34,10 +36,11 @@ const boardSlice = createSlice({
         //     }
         // },
         setSelectedBoard: (state: BoardState, action: PayloadAction<string>) => {
-            const id = action.payload;
-            if (state.selectedBoardId !== id) {
-                state.selectedBoardId = id;
-            }
+            state.selectedBoardId = action.payload;
+            state.selectedCardId = null; // Clear selected card when board changes
+        },
+        setSelectedCard: (state: BoardState, action: PayloadAction<string | null>) => {
+            state.selectedCardId = action.payload;
         }
     }
 });
